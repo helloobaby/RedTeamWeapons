@@ -13,7 +13,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: configure
-      run: apt install mingw-w64
-      run: apt install clang
-      run: ./configure
+    - run: apt -y install mingw-w64
+    - run: apt -y install clang
+    - run: ./configure
