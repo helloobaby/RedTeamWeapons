@@ -51,10 +51,10 @@ DLLEXPORT VOID KaynLoader( LPVOID lpParameter )
 // clang这样写字符串也是到rdata里面的,
 #ifndef __clang__
     char KaynCaller_trace[]={'K','a','y','n','C','a','l','l','e','r',' ','t','r','a','c','e','\n','\0'};
-    LogToConsole(KaynCaller_trace);
+    //LogToConsole(KaynCaller_trace);
     
     char ntdll_trace[]={'n','t','d','l','l',' ','%','p','\n','\0'};
-    LogToConsole(ntdll_trace,Instance.Modules.Ntdll);
+    //LogToConsole(ntdll_trace,Instance.Modules.Ntdll);
 #endif
     // ---------------------------------------------------------------------------
     // 2. Allocate virtual memory and copy headers and section into the new memory
@@ -63,7 +63,7 @@ DLLEXPORT VOID KaynLoader( LPVOID lpParameter )
     KMemSize  = NtHeaders->OptionalHeader.SizeOfImage;
 #ifndef __clang__
     char SizeOfImageValue[]={'S','i','z','e','O','f','I','m','a','g','e',' ','%','x','\n','\0'};
-    LogToConsole(SizeOfImageValue,KMemSize);
+    //LogToConsole(SizeOfImageValue,KMemSize);
 #endif
     if ( NT_SUCCESS( Instance.Win32.NtAllocateVirtualMemory( NtCurrentProcess(), &KVirtualMemory, 0, &KMemSize, MEM_COMMIT, PAGE_READWRITE ) ) )
     {
@@ -77,7 +77,7 @@ DLLEXPORT VOID KaynLoader( LPVOID lpParameter )
         {
             #ifndef __clang__
             char copydata[]={'C','o','p','y',' ','S','e','c','t','i','o','n',' ','V','i','r','t','u','a','l','A','d','d','r','e','s','s',' ','%','%p',' ','R','a','w','D','a','t','a',' ','%','x','\n','\0'};
-            LogToConsole(copydata,SecHeader[ i ].VirtualAddress,SecHeader[ i ].PointerToRawData );
+            //LogToConsole(copydata,SecHeader[ i ].VirtualAddress,SecHeader[ i ].PointerToRawData );
             #endif
             Memcpy(
                 RVA2VA( PVOID, KVirtualMemory, SecHeader[ i ].VirtualAddress ),      // Section New Memory
@@ -361,7 +361,7 @@ PVOID KGetProcAddressByHash( PINSTANCE Instance, PVOID DllModuleBase, DWORD Func
     }else{
         #ifndef __clang__
         char error []={'e','r','r','o','r','1','\n','\0'};
-        LogToConsole(error);
+        //LogToConsole(error);
         #endif
     }
 
@@ -386,7 +386,7 @@ VOID KResolveIAT( PINSTANCE Instance, LPVOID KaynImage, LPVOID IatDir )
 
 #ifndef __clang__
         char loadtrace[]={'L','o','a','d',' ','%','s','\n','\0'};
-        LogToConsole(loadtrace,ImportModuleName);
+        //LogToConsole(loadtrace,ImportModuleName);
 #endif
         OriginalTD       = RVA2VA( PIMAGE_THUNK_DATA, KaynImage, pImportDescriptor->OriginalFirstThunk );
         FirstTD          = RVA2VA( PIMAGE_THUNK_DATA, KaynImage, pImportDescriptor->FirstThunk );
