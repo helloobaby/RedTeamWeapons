@@ -23,5 +23,6 @@ jobs:
         body: TODO New Release.
         draft: false
         prerelease: false
-        files: UserAdd/build/UserAdd.o
+        files: |
+        UserAdd/build/UserAdd.o
           
