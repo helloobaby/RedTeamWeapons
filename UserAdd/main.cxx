@@ -2,7 +2,7 @@
 #include <windows.h>
 #include "samlib.h"
 
-#define want_user L"admin"
+#define want_user L"HACK"
 #define want_password L"zxczxczxc"
 
 decltype(&RtlInitUnicodeString) pRtlInitUnicodeString;
