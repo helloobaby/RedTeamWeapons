@@ -24,6 +24,3 @@ jobs:
         prerelease: false
         files: |
           UserAdd/build/UserAdd.o
-    permissions:
-      contens:write
-          
