@@ -13,7 +13,4 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - run: sudo apt -y install mingw-w64
-    - run: sudo apt -y install clang
-    - run: ./configure
-    - run: cd ..
+    - run: sudo ./configure
