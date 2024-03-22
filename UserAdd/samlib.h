@@ -135,21 +135,21 @@ typedef struct _SAMPR_GET_MEMBERS_BUFFER {
 
 
 
-extern NTSTATUS WINAPI SamConnect(IN PUNICODE_STRING ServerName, OUT SAMPR_HANDLE* ServerHandle, IN ACCESS_MASK DesiredAccess, IN BOOLEAN Trusted);
-extern NTSTATUS WINAPI SamOpenDomain(IN SAMPR_HANDLE SamHandle, IN ACCESS_MASK DesiredAccess, IN PSID DomainId, OUT SAMPR_HANDLE* DomainHandle);
-extern NTSTATUS WINAPI SamLookupDomainInSamServer(IN SAMPR_HANDLE ServerHandle, IN PUNICODE_STRING Name, OUT PSID* DomainId);
-extern NTSTATUS WINAPI SamEnumerateDomainsInSamServer(IN SAMPR_HANDLE ServerHandle, OUT DWORD* EnumerationContext, OUT PSAMPR_RID_ENUMERATION* Buffer, IN DWORD PreferedMaximumLength, OUT DWORD* CountReturned);
-extern NTSTATUS WINAPI SamCreateUser2InDomain(IN SAMPR_HANDLE DomainHandle, IN PUNICODE_STRING AccountName, IN ULONG AccountType, IN ACCESS_MASK DesiredAccess, OUT SAMPR_HANDLE UserHandle, OUT PULONG GrantedAccess, OUT PULONG RelativeId);
-extern NTSTATUS WINAPI SamSetInformationUser(IN SAMPR_HANDLE UserHandle, IN USER_INFORMATION_CLASS UserInformationClass, PSAMPR_USER_INFO_BUFFER Buffer);
-extern NTSTATUS WINAPI SamCloseHandle(IN SAMPR_HANDLE SamHandle);
-extern NTSTATUS WINAPI SamFreeMemory(IN PVOID Buffer);
-extern NTSTATUS WINAPI SamOpenGroup(IN SAMPR_HANDLE DomainHandle, IN ACCESS_MASK DesiredAccess, IN DWORD GroupId, OUT SAMPR_HANDLE* GroupHandle);
-extern NTSTATUS WINAPI SamAddMemberToGroup(IN SAMPR_HANDLE GroupHandle, IN ULONG MemberId, IN ULONG Attributes);
-extern NTSTATUS WINAPI SamEnumerateGroupsInDomain(IN SAMPR_HANDLE DomainHandle, IN OUT PDWORD EnumerationContext, OUT PSAMPR_RID_ENUMERATION* Buffer, IN DWORD PreferedMaximumLength, OUT PDWORD CountReturned);
-extern NTSTATUS WINAPI SamLookupNamesInDomain(IN SAMPR_HANDLE DomainHandle, IN DWORD Count, IN PUNICODE_STRING Names, OUT PDWORD* RelativeIds, OUT PDWORD* Use);
-extern NTSTATUS WINAPI SamAddMemberToAlias(IN SAMPR_HANDLE AliasHandle, IN PSID MemberId);
-extern NTSTATUS WINAPI SamOpenAlias(IN SAMPR_HANDLE DomainHandle, IN ACCESS_MASK DesiredAccess, IN DWORD AliasId, OUT SAMPR_HANDLE* AliasHandle);
-extern NTSTATUS WINAPI SamRidToSid(IN SAMPR_HANDLE ObjectHandle, IN ULONG Rid, OUT PSID* Sid);
+NTSTATUS WINAPI SamConnect(IN PUNICODE_STRING ServerName, OUT SAMPR_HANDLE* ServerHandle, IN ACCESS_MASK DesiredAccess, IN BOOLEAN Trusted);
+NTSTATUS WINAPI SamOpenDomain(IN SAMPR_HANDLE SamHandle, IN ACCESS_MASK DesiredAccess, IN PSID DomainId, OUT SAMPR_HANDLE* DomainHandle);
+NTSTATUS WINAPI SamLookupDomainInSamServer(IN SAMPR_HANDLE ServerHandle, IN PUNICODE_STRING Name, OUT PSID* DomainId);
+NTSTATUS WINAPI SamEnumerateDomainsInSamServer(IN SAMPR_HANDLE ServerHandle, OUT DWORD* EnumerationContext, OUT PSAMPR_RID_ENUMERATION* Buffer, IN DWORD PreferedMaximumLength, OUT DWORD* CountReturned);
+NTSTATUS WINAPI SamCreateUser2InDomain(IN SAMPR_HANDLE DomainHandle, IN PUNICODE_STRING AccountName, IN ULONG AccountType, IN ACCESS_MASK DesiredAccess, OUT SAMPR_HANDLE UserHandle, OUT PULONG GrantedAccess, OUT PULONG RelativeId);
+NTSTATUS WINAPI SamSetInformationUser(IN SAMPR_HANDLE UserHandle, IN USER_INFORMATION_CLASS UserInformationClass, PSAMPR_USER_INFO_BUFFER Buffer);
+NTSTATUS WINAPI SamCloseHandle(IN SAMPR_HANDLE SamHandle);
+NTSTATUS WINAPI SamFreeMemory(IN PVOID Buffer);
+NTSTATUS WINAPI SamOpenGroup(IN SAMPR_HANDLE DomainHandle, IN ACCESS_MASK DesiredAccess, IN DWORD GroupId, OUT SAMPR_HANDLE* GroupHandle);
+NTSTATUS WINAPI SamAddMemberToGroup(IN SAMPR_HANDLE GroupHandle, IN ULONG MemberId, IN ULONG Attributes);
+NTSTATUS WINAPI SamEnumerateGroupsInDomain(IN SAMPR_HANDLE DomainHandle, IN OUT PDWORD EnumerationContext, OUT PSAMPR_RID_ENUMERATION* Buffer, IN DWORD PreferedMaximumLength, OUT PDWORD CountReturned);
+NTSTATUS WINAPI SamLookupNamesInDomain(IN SAMPR_HANDLE DomainHandle, IN DWORD Count, IN PUNICODE_STRING Names, OUT PDWORD* RelativeIds, OUT PDWORD* Use);
+NTSTATUS WINAPI SamAddMemberToAlias(IN SAMPR_HANDLE AliasHandle, IN PSID MemberId);
+NTSTATUS WINAPI SamOpenAlias(IN SAMPR_HANDLE DomainHandle, IN ACCESS_MASK DesiredAccess, IN DWORD AliasId, OUT SAMPR_HANDLE* AliasHandle);
+NTSTATUS WINAPI SamRidToSid(IN SAMPR_HANDLE ObjectHandle, IN ULONG Rid, OUT PSID* Sid);
 
 #define SAM_SERVER_CONNECT				0x00000001
 #define SAM_SERVER_SHUTDOWN				0x00000002

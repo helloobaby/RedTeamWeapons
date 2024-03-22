@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <Windows.h>
 #include "samlib.h"
-#include "../Shared/easylogging++.h"
 
 #pragma comment(lib, "samlib.lib")
 #pragma comment(lib, "ntdll.lib")
